@@ -1,4 +1,14 @@
-<div
-  class="h-32 pointer-events-auto w-full max-w-xl mx-auto rounded-2xl border border-zinc-700 bg-zinc-900 p-4 shadow-lg">
-  <textarea class="w-full h-full resize-none border-0 outline-none text-zinc-200"></textarea>
+<div class="h-32 relative bg-zinc-800 pb-8">
+  <div
+    class="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto w-full max-w-xl mx-auto rounded-xl border border-zinc-700 bg-zinc-900 p-4 shadow-lg">
+    <textarea appAutoResize class="mb-2 w-full h-full resize-none border-0 outline-none text-zinc-200 max-h-96"
+      placeholder="Write your question here..." [(ngModel)]="prompt" (keypress)="onEnterPressed($event)"></textarea>
+
+    <div class="flex justify-end gap-x-2">
+      <button class="text-zinc-400 bg-zinc-700 px-3 cursor-not-allowed!" disabled>Switch model</button>
+      <button type="button" class="bg-amber-700 hover:bg-amber-600 btn-icon text-white" (click)="sendPrompt()">
+        <i class="fa fa-arrow-up"></i>
+      </button>
+    </div>
+  </div>
 </div>

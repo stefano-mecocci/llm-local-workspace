@@ -1,1 +1,7 @@
-<div class="h-full w-full overflow-y-auto p-10"></div>
+<div class="flex h-full w-full max-w-3xl mx-auto flex-col gap-4 overflow-y-auto py-10 px-5">
+  <app-ai-message content="Hi! How can I help you today?" />
+  <app-user-message content="Can you explain how routing works in Angular?" />
+  <app-ai-message
+    content="Sure! Routing in Angular maps URLs to components, and lazy loading splits bundles per route." />
+  <app-user-message content="Thanks, that makes sense!" />
+</div>

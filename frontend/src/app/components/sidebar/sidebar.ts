@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 
 @Component({
   selector: 'app-sidebar',
@@ -6,4 +6,14 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Sidebar {}
+export class Sidebar {
+  readonly open = signal(true);
+
+  close() {
+    this.open.set(false);
+  }
+
+  show() {
+    this.open.set(true);
+  }
+}

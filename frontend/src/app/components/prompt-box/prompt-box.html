@@ -5,8 +5,8 @@
       placeholder="Write your question here..." [(ngModel)]="prompt" (keypress)="onEnterPressed($event)"></textarea>
 
     <div class="flex justify-end gap-x-2">
-      <p-select [options]="availableModels" [(ngModel)]="choosedModel" optionLabel="label" optionValue="model"
-        (onChange)="changeModel($event)" />
+      <p-select variant="filled" [options]="availableModels" [(ngModel)]="choosedModel" optionLabel="label"
+        optionValue="model" (onChange)="changeModel($event)" />
 
       <button pButton iconOnly (click)="sendPrompt()">
         <svg data-p-icon="arrow-up"></svg>

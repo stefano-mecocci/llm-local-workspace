@@ -6,19 +6,16 @@
       <span class="text-sm font-semibold text-zinc-200">Chats</span>
 
       <!-- Close button -->
-      <button type="button" class="btn-icon text-zinc-200 hover:bg-zinc-800" (click)="close()"
-        aria-label="Close sidebar">
-        <i class="fa fa-times"></i>
-      </button>
+      <button pButton iconOnly severity="secondary" variant="text" aria-label="Close sidebar" (click)="close()"><svg
+          data-p-icon="times"></svg></button>
 
     </div>
     <nav class="flex-1 overflow-y-auto p-4"></nav>
   </div>
 </aside>
 } @else {
-<button type="button"
-  class="fixed left-4 top-4 z-50 btn-icon rounded-md border border-zinc-500 bg-zinc-700 text-zinc-200 shadow hover:bg-zinc-600"
-  (click)="show()" aria-label="Open sidebar" animate.enter="button-enter" animate.leave="button-leave">
-  <i class="fa fa-bars"></i>
-</button>
+<div class="fixed left-4 top-4 z-10">
+  <button pButton iconOnly severity="secondary" size="large" aria-label="Open sidebar" (click)="show()"
+    animate.enter="button-enter" animate.leave="button-leave"><svg data-p-icon="bars"></svg></button>
+</div>
 }

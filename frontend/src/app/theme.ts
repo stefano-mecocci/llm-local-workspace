@@ -24,7 +24,12 @@ const CustomPreset = definePreset(Aura, {
                     color: "var(--color-zinc-100)",
                     hoverColor: "var(--color-zinc-300)",
                     activeColor: "var(--color-zinc-300)",
-                }
+                },
+                secondary: {
+                    color: "white",
+                    borderColor: "var(--color-zinc-600)",
+                    background: "var(--color-zinc-800)"
+                },
             }
         }
     }

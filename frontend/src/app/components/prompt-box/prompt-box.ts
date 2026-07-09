@@ -1,9 +1,10 @@
-import { Component, ChangeDetectionStrategy, signal, model } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, model, inject } from '@angular/core';
 import { AutoResizeDirective } from "../../directives/auto-resize";
 import { FormsModule } from '@angular/forms';
 import { Select, SelectChangeEvent } from 'primeng/select';
 import { ButtonDirective } from 'primeng/button';
 import { ArrowUpIcon } from 'primeng/icons';
+import { ChatState } from '../../services/chat-state';
 
 type LlmModel = "gemma4:e2b" | "gemma4:e4b-mlx"
 
@@ -15,6 +16,8 @@ type LlmModel = "gemma4:e2b" | "gemma4:e4b-mlx"
   imports: [AutoResizeDirective, FormsModule, Select, ButtonDirective, ArrowUpIcon],
 })
 export class PromptBox {
+  readonly chatState = inject(ChatState);
+
   readonly prompt = model('');
   readonly availableModels: { label: string, model: LlmModel }[] = [
     { label: "Gemma 4 (2B)", model: "gemma4:e2b" },
@@ -35,6 +38,7 @@ export class PromptBox {
 
   sendPrompt() {
     console.log("Prompt sent to LLM: " + this.prompt().trim());
+    this.chatState.sendMessage(this.prompt().trim());
     this.prompt.set('');
   }
 }

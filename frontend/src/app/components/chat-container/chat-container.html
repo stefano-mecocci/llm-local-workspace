@@ -1,5 +1,6 @@
 <div class="relative h-full w-full">
-  <app-message-feed />
+  <app-message-feed [messages]="messages()" />
+
   <div class="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-4">
     <app-prompt-box />
   </div>

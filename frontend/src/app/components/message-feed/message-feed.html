@@ -1,5 +1,5 @@
 <div class="flex h-full w-full max-w-3xl mx-auto flex-col gap-4 overflow-y-auto py-10 px-5">
-  @for (message of messages; track $index) {
+  @for (message of messages(); track $index) {
   @if (message.role === "assistant") {
   <app-ai-message [content]="message.content"></app-ai-message>
   } @else {

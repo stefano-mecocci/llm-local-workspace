@@ -1,7 +1,12 @@
-<div class="flex flex-col h-full w-full overflow-y-auto">
+<div class="flex flex-col h-full w-full overflow-y-auto" #scrollFrame>
   <app-message-feed [messages]="messages()" />
 
-  <div class="pointer-events-none sticky bottom-0 flex justify-center p-4 bg-zinc-800/50">
+  <div class="pointer-events-none sticky bottom-0 flex justify-center p-4 bg-zinc-800">
     <app-prompt-box (onSendPrompt)="handlePrompt($event)" />
+  </div>
+
+  <div class="absolute top-0 h-20 bg-linear-to-b from-zinc-800 to-transparent w-11/12 left-1/2 -translate-x-1/2">
+  </div>
+  <div class="absolute bottom-40 h-20 bg-linear-to-t from-zinc-800 to-transparent w-11/12 left-1/2 -translate-x-1/2">
   </div>
 </div>

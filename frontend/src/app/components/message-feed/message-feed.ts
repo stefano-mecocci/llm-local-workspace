@@ -1,15 +1,19 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, inject } from '@angular/core';
 import { UserMessage } from '../user-message/user-message';
 import { AiMessage } from '../ai-message/ai-message';
-import { ChatMessage } from '../../services/chat-state';
+import { ChatMessage, ChatState } from '../../services/chat-state';
+import { ProgressBar } from 'primeng/progressbar';
 
 @Component({
   selector: 'app-message-feed',
-  imports: [UserMessage, AiMessage],
+  imports: [UserMessage, AiMessage, ProgressBar],
   templateUrl: './message-feed.html',
   styleUrl: './message-feed.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageFeed {
   readonly messages = input.required<ChatMessage[]>();
+  readonly #chatState = inject(ChatState);
+
+  isLoading = this.#chatState.isLoading;
 }

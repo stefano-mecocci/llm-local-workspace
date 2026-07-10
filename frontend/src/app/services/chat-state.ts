@@ -15,6 +15,7 @@ export class ChatState {
 
     #currentChatId = signal<string | null>(null);
     #isStreaming = signal(false);
+    #isLoading = signal(false);
     #messages = linkedSignal<ChatMessage[], ChatMessage[]>({
         source: () => this.#chatHistoryResource.value(),
         computation: (nextHistory, previous) => {
@@ -30,6 +31,7 @@ export class ChatState {
 
     chatIds = httpResource<string[]>(() => `${this.API_URL}/chat_ids`);
     isStreaming = this.#isStreaming.asReadonly();
+    isLoading = this.#isLoading.asReadonly();
     messages = this.#messages.asReadonly();
     currentChatId = this.#currentChatId.asReadonly();
 
@@ -62,6 +64,7 @@ export class ChatState {
         this.stopCurrentStream();
         this.#abortLastPromptController = new AbortController();
 
+        this.#isLoading.set(true);
         this.#isStreaming.set(true);
         this.addUserMessage(prompt);
         this.addAiMessage('');
@@ -74,6 +77,8 @@ export class ChatState {
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
+
+            this.#isLoading.set(false);
 
             while (true) {
                 const { done, value } = await reader.read();

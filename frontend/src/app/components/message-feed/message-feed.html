@@ -6,4 +6,8 @@
   <app-user-message [content]="message.content"></app-user-message>
   }
   }
+
+  @if (isLoading()) {
+  <p-progress-bar mode="indeterminate" />
+  }
 </div>

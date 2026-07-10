@@ -10,7 +10,21 @@
           data-p-icon="times"></svg></button>
 
     </div>
-    <nav class="flex-1 overflow-y-auto p-4"></nav>
+
+    <div class="grid grid-cols-2 gap-x-2 mx-4">
+      <a pButton routerLink="/" class="col-span-1"><svg data-p-icon="home"></svg> Home</a>
+
+      @if (!isRootRoute()) {
+      <button pButton class="col-span-1" (click)="openNewChat()"><svg data-p-icon="plus"></svg>New chat</button>
+      }
+    </div>
+
+    <nav class="flex-1 overflow-y-auto p-4 flex flex-col gap-y-4">
+      @for (chatId of chatIds.value(); track chatId) {
+      <a pButton variant="text" severity="secondary" [routerLink]="['chat', chatId]" class="text-zinc-200! block!">{{
+        chatId }}</a>
+      }
+    </nav>
   </div>
 </aside>
 } @else {

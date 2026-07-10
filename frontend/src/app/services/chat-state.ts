@@ -14,34 +14,53 @@ export class ChatState {
 
     #currentChatId = signal<string | null>(null);
     #isStreaming = signal(false);
-    #messages = linkedSignal<ChatMessage[]>(() => (this.chatHistoryResource.value()));
+    #messages = linkedSignal<ChatMessage[], ChatMessage[]>({
+        source: () => this.#chatHistoryResource.value(),
+        computation: (nextHistory, previous) => {
+            if (this.#isStreaming() || (previous && previous.value.length > (nextHistory?.length ?? 0))) {
+                return previous?.value ?? [];
+            }
+            return nextHistory ?? [];
+        }
+    });
+
     #abortLastPromptController: AbortController | null = null;
 
+    chatIds = httpResource<string[]>(() => `${this.API_URL}/chat_ids`);
     isStreaming = this.#isStreaming.asReadonly();
     messages = this.#messages.asReadonly();
 
-    private chatHistoryResource = httpResource<ChatMessage[]>(() => {
+    #chatHistoryResource = httpResource<ChatMessage[]>(() => {
         const id = this.#currentChatId();
         if (!id) return;
 
         return `${this.API_URL}/fetch_chat?chat_id=${id}`;
     }, { defaultValue: [] });
 
-    switchChat(chatId: string) {
-        this.stopCurrentStream();
-        this.#currentChatId.set(chatId);
+    switchChat(newChatId: string, options: { stopCurrentStream?: boolean; } = {}) {
+        if (options.stopCurrentStream) {
+            this.stopCurrentStream();
+        }
+        this.clearChatState();
+
+        this.#currentChatId.set(newChatId);
     }
 
-    async sendMessage(prompt: string) {
+    clearChatState() {
+        this.#currentChatId.set(null);
+        this.#messages.set([]);
+    }
+
+    async sendMessage(prompt: string, chatId: string) {
         this.stopCurrentStream();
         this.#abortLastPromptController = new AbortController();
 
+        this.#isStreaming.set(true);
         this.addUserMessage(prompt);
         this.addAiMessage('');
-        this.#isStreaming.set(true);
 
         try {
-            const url = this.buildStreamUrl(this.#currentChatId() as string, prompt, "gemma4:e2b");
+            const url = this.buildStreamUrl(chatId, prompt, "gemma4:e2b");
             const response = await fetch(url, { signal: this.#abortLastPromptController.signal });
 
             if (!response.body) throw new Error('No response body');
@@ -61,13 +80,14 @@ export class ChatState {
         } finally {
             this.#abortLastPromptController = null;
             this.#isStreaming.set(false);
+            this.chatIds.reload();
         }
     }
 
     private buildStreamUrl(chatId: string, prompt: string, model: string) {
         const params = new HttpParams()
             .set("chat_id", chatId)
-            .set("prompt", encodeURIComponent(prompt))
+            .set("prompt", prompt)
             .set("model", model);
 
         return `${this.API_URL}/stream?${params.toString()}`

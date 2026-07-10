@@ -1,10 +1,11 @@
-import { Component, ChangeDetectionStrategy, signal, model, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, model, inject, output } from '@angular/core';
 import { AutoResizeDirective } from "../../directives/auto-resize";
 import { FormsModule } from '@angular/forms';
 import { Select, SelectChangeEvent } from 'primeng/select';
 import { ButtonDirective } from 'primeng/button';
 import { ArrowUpIcon } from 'primeng/icons';
 import { ChatState } from '../../services/chat-state';
+import { Router } from '@angular/router';
 
 type LlmModel = "gemma4:e2b" | "gemma4:e4b-mlx"
 
@@ -17,6 +18,7 @@ type LlmModel = "gemma4:e2b" | "gemma4:e4b-mlx"
 })
 export class PromptBox {
   readonly chatState = inject(ChatState);
+  readonly #router = inject(Router);
 
   readonly prompt = model('');
   readonly availableModels: { label: string, model: LlmModel }[] = [
@@ -24,6 +26,8 @@ export class PromptBox {
     { label: "Gemma 4 (4B MLX)", model: "gemma4:e4b-mlx" }
   ];
   readonly choosedModel = signal<LlmModel>("gemma4:e2b");
+
+  onSendPrompt = output<string>();
 
   changeModel(event: SelectChangeEvent) {
     console.log(event.value);
@@ -37,8 +41,18 @@ export class PromptBox {
   }
 
   sendPrompt() {
-    console.log("Prompt sent to LLM: " + this.prompt().trim());
-    this.chatState.sendMessage(this.prompt().trim());
+    const trimmedPrompt = this.prompt().trim();
+    if (trimmedPrompt === "") return;
     this.prompt.set('');
+
+    if (this.#router.url === "/") {
+      const newChatId = crypto.randomUUID();
+      this.#router.navigate(['chat', newChatId], {
+        state: { prompt: trimmedPrompt }
+      });
+      return;
+    }
+
+    this.onSendPrompt.emit(trimmedPrompt);
   }
 }

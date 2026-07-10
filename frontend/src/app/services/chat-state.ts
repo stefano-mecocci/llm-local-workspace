@@ -1,5 +1,6 @@
 import { HttpParams, httpResource } from '@angular/common/http';
 import { linkedSignal, Service, signal } from '@angular/core';
+import { LlmModel } from '../types';
 
 export enum ChatMessageRole {
     Assistant = 'assistant',
@@ -25,6 +26,7 @@ export class ChatState {
     });
 
     #abortLastPromptController: AbortController | null = null;
+    #selectedModel = signal<LlmModel>("gemma4:e2b");
 
     chatIds = httpResource<string[]>(() => `${this.API_URL}/chat_ids`);
     isStreaming = this.#isStreaming.asReadonly();
@@ -37,6 +39,10 @@ export class ChatState {
 
         return `${this.API_URL}/fetch_chat?chat_id=${id}`;
     }, { defaultValue: [] });
+
+    switchModel(newModel: LlmModel) {
+        this.#selectedModel.set(newModel);
+    }
 
     switchChat(newChatId: string, options: { stopCurrentStream?: boolean; } = {}) {
         if (options.stopCurrentStream) {
@@ -61,7 +67,7 @@ export class ChatState {
         this.addAiMessage('');
 
         try {
-            const url = this.buildStreamUrl(chatId, prompt, "gemma4:e2b");
+            const url = this.buildStreamUrl(chatId, prompt, this.#selectedModel());
             const response = await fetch(url, { signal: this.#abortLastPromptController.signal });
 
             if (!response.body) throw new Error('No response body');

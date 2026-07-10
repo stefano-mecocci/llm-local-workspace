@@ -6,8 +6,7 @@ import { ButtonDirective } from 'primeng/button';
 import { ArrowUpIcon } from 'primeng/icons';
 import { ChatState } from '../../services/chat-state';
 import { Router } from '@angular/router';
-
-type LlmModel = "gemma4:e2b" | "gemma4:e4b-mlx"
+import { LlmModel } from '../../types';
 
 @Component({
   selector: 'app-prompt-box',
@@ -17,7 +16,7 @@ type LlmModel = "gemma4:e2b" | "gemma4:e4b-mlx"
   imports: [AutoResizeDirective, FormsModule, Select, ButtonDirective, ArrowUpIcon],
 })
 export class PromptBox {
-  readonly chatState = inject(ChatState);
+  readonly #chatState = inject(ChatState);
   readonly #router = inject(Router);
 
   readonly prompt = model('');
@@ -30,7 +29,8 @@ export class PromptBox {
   onSendPrompt = output<string>();
 
   changeModel(event: SelectChangeEvent) {
-    console.log(event.value);
+    const selectedModel = event.value;
+    this.#chatState.switchModel(selectedModel);
   }
 
   onEnterPressed(event: KeyboardEvent) {

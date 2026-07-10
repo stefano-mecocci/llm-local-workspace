@@ -21,7 +21,8 @@
 
     <nav class="flex-1 overflow-y-auto p-4 flex flex-col gap-y-4">
       @for (chatId of chatIds.value(); track chatId) {
-      <a pButton variant="text" severity="secondary" [routerLink]="['chat', chatId]" class="text-zinc-200! block!">{{
+      <a pButton variant="text" severity="secondary" [routerLink]="['chat', chatId]" routerLinkActive="bg-zinc-700!"
+        class="text-zinc-200!">{{
         chatId }}</a>
       }
     </nav>

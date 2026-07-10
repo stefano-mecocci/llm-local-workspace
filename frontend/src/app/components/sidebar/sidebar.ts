@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
-import { Router, NavigationEnd, RouterLink } from '@angular/router';
+import { Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { ButtonDirective } from 'primeng/button';
 import { BarsIcon, HomeIcon, PlusIcon, TimesIcon } from 'primeng/icons';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -11,13 +11,14 @@ import { ChatState } from '../../services/chat-state';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ButtonDirective, BarsIcon, TimesIcon, PlusIcon, RouterLink, HomeIcon]
+  imports: [ButtonDirective, BarsIcon, TimesIcon, PlusIcon, RouterLink, HomeIcon, RouterLinkActive]
 })
 export class Sidebar {
   #router = inject(Router);
   #chatState = inject(ChatState);
 
   chatIds = this.#chatState.chatIds;
+  currentChatId = this.#chatState.currentChatId;
 
   readonly open = signal(true);
   readonly #url = toSignal(

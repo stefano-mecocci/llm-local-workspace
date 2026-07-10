@@ -29,6 +29,7 @@ export class ChatState {
     chatIds = httpResource<string[]>(() => `${this.API_URL}/chat_ids`);
     isStreaming = this.#isStreaming.asReadonly();
     messages = this.#messages.asReadonly();
+    currentChatId = this.#currentChatId.asReadonly();
 
     #chatHistoryResource = httpResource<ChatMessage[]>(() => {
         const id = this.#currentChatId();

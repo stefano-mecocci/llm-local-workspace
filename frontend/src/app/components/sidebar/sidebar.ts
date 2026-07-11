@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { ButtonDirective } from 'primeng/button';
-import { BarsIcon, HomeIcon, PlusIcon, TimesIcon } from 'primeng/icons';
+import { BarsIcon, PlusIcon, TimesIcon } from 'primeng/icons';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { ChatState } from '../../services/chat-state';
@@ -11,7 +11,7 @@ import { ChatState } from '../../services/chat-state';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ButtonDirective, BarsIcon, TimesIcon, PlusIcon, RouterLink, HomeIcon, RouterLinkActive]
+  imports: [ButtonDirective, BarsIcon, TimesIcon, PlusIcon, RouterLink, RouterLinkActive]
 })
 export class Sidebar {
   #router = inject(Router);
@@ -37,10 +37,5 @@ export class Sidebar {
 
   show() {
     this.open.set(true);
-  }
-
-  openNewChat() {
-    const newChatId = crypto.randomUUID();
-    this.#router.navigate(['chat', newChatId]);
   }
 }

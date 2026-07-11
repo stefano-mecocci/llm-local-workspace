@@ -1,5 +1,6 @@
 @if (open()) {
-<aside class="absolute left-0 top-0 z-30 flex h-full flex-col overflow-hidden bg-zinc-900 sm:relative"
+<aside
+  class="absolute left-0 top-0 z-30 flex h-full flex-col border-r border-zinc-700 overflow-hidden bg-zinc-900 sm:relative"
   animate.enter="sidebar-enter" animate.leave="sidebar-leave">
   <div class="flex h-full w-64 flex-col">
     <div class="flex items-center justify-between p-4">
@@ -11,11 +12,9 @@
 
     </div>
 
-    <div class="grid grid-cols-2 gap-x-2 mx-4">
-      <a pButton routerLink="/" class="col-span-1"><svg data-p-icon="home"></svg> Home</a>
-
+    <div class="mx-4">
       @if (!isRootRoute()) {
-      <button pButton class="col-span-1" (click)="openNewChat()"><svg data-p-icon="plus"></svg>New chat</button>
+      <a pButton routerLink="/" fluid><svg data-p-icon="plus"></svg>New chat</a>
       }
     </div>
 

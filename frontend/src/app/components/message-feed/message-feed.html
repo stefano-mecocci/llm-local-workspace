@@ -8,6 +8,9 @@
   }
 
   @if (isLoading()) {
-  <p-progress-bar mode="indeterminate" />
+  <div class="flex gap-x-2 items-center ml-2">
+    <div class="loader"></div>
+    <span class="text-zinc-300">Thinking...</span>
+  </div>
   }
 </div>

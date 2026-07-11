@@ -2,11 +2,10 @@ import { Component, ChangeDetectionStrategy, input, inject } from '@angular/core
 import { UserMessage } from '../user-message/user-message';
 import { AiMessage } from '../ai-message/ai-message';
 import { ChatMessage, ChatState } from '../../services/chat-state';
-import { ProgressBar } from 'primeng/progressbar';
 
 @Component({
   selector: 'app-message-feed',
-  imports: [UserMessage, AiMessage, ProgressBar],
+  imports: [UserMessage, AiMessage],
   templateUrl: './message-feed.html',
   styleUrl: './message-feed.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

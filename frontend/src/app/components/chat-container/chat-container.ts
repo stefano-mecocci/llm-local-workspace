@@ -31,7 +31,10 @@ export class ChatContainerComponent implements OnDestroy {
       this.chatState.switchChat(chatId, { stopCurrentStream: true });
 
       if (history.state["prompt"]) {
-        this.chatState.sendMessage(history.state["prompt"], chatId)
+        this.chatState.sendMessage(history.state["prompt"], chatId);
+        const newState = { ...history.state };
+        delete newState["prompt"];
+        history.replaceState(newState, '');
       }
     });
   }

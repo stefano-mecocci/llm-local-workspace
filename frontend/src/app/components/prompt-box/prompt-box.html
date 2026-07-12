@@ -23,8 +23,12 @@
       <p-select variant="filled" [options]="availableModels" [(ngModel)]="choosedModel" optionLabel="label"
         optionValue="model" (onChange)="changeModel($event)" />
 
-      <button pButton iconOnly (click)="sendPrompt()">
+      <button pButton iconOnly (click)="sendPrompt()" [disabled]="isStreaming()">
+        @if (isStreaming()) {
+        <svg data-p-icon="spinner" class="animate-spin"></svg>
+        } @else {
         <svg data-p-icon="arrow-up"></svg>
+        }
       </button>
     </div>
   </div>

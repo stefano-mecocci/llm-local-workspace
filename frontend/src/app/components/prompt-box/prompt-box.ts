@@ -3,7 +3,7 @@ import { AutoResizeDirective } from "../../directives/auto-resize";
 import { FormsModule } from '@angular/forms';
 import { Select, SelectChangeEvent } from 'primeng/select';
 import { ButtonDirective } from 'primeng/button';
-import { ArrowUpIcon, TimesIcon } from 'primeng/icons';
+import { ArrowUpIcon, SpinnerIcon, TimesIcon } from 'primeng/icons';
 import { ChatState } from '../../services/chat-state';
 import { Router } from '@angular/router';
 import { LlmModel } from '../../types';
@@ -13,7 +13,7 @@ import { LlmModel } from '../../types';
   templateUrl: './prompt-box.html',
   styleUrl: './prompt-box.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AutoResizeDirective, FormsModule, Select, ButtonDirective, ArrowUpIcon, TimesIcon],
+  imports: [AutoResizeDirective, FormsModule, Select, ButtonDirective, ArrowUpIcon, TimesIcon, SpinnerIcon],
 })
 export class PromptBox {
   readonly #chatState = inject(ChatState);
@@ -28,6 +28,7 @@ export class PromptBox {
   readonly choosedModel = signal<LlmModel>("gemma4:e2b");
 
   onSendPrompt = output<string>();
+  isStreaming = this.#chatState.isStreaming;
 
   changeModel(event: SelectChangeEvent) {
     const selectedModel = event.value;

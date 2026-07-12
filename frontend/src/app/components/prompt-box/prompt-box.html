@@ -19,17 +19,27 @@
       placeholder="Write your question here..." (paste)="onPaste($event)" [(ngModel)]="prompt"
       (keypress)="onEnterPressed($event)"></textarea>
 
-    <div class="flex justify-end gap-x-2">
-      <p-select variant="filled" [options]="availableModels" [(ngModel)]="choosedModel" optionLabel="label"
-        optionValue="model" (onChange)="changeModel($event)" />
+    <div class="flex justify-between gap-x-2">
+      <div class="flex gap-2">
+        <button pButton iconOnly severity="secondary" variant="text" [disabled]="isStreaming()"
+          (click)="imageSelector.click()">
+          <svg data-p-icon="plus"></svg>
+        </button>
+      </div>
+      <div class="flex gap-2">
+        <p-select variant="filled" [options]="availableModels" [(ngModel)]="choosedModel" optionLabel="label"
+          optionValue="model" (onChange)="changeModel($event)" />
 
-      <button pButton iconOnly (click)="sendPrompt()" [disabled]="isStreaming()">
-        @if (isStreaming()) {
-        <svg data-p-icon="spinner" class="animate-spin"></svg>
-        } @else {
-        <svg data-p-icon="arrow-up"></svg>
-        }
-      </button>
+        <button pButton iconOnly (click)="sendPrompt()" [disabled]="isStreaming()">
+          @if (isStreaming()) {
+          <svg data-p-icon="spinner" class="animate-spin"></svg>
+          } @else {
+          <svg data-p-icon="arrow-up"></svg>
+          }
+        </button>
+      </div>
     </div>
   </div>
 </div>
+
+<input type="file" accept="image/*" class="hidden" name="" (change)="onImageSelected($event)" #imageSelector>

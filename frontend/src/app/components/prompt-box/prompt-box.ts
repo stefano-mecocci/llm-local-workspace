@@ -3,7 +3,7 @@ import { AutoResizeDirective } from "../../directives/auto-resize";
 import { FormsModule } from '@angular/forms';
 import { Select, SelectChangeEvent } from 'primeng/select';
 import { ButtonDirective } from 'primeng/button';
-import { ArrowUpIcon, SpinnerIcon, TimesIcon } from 'primeng/icons';
+import { ArrowUpIcon, PlusIcon, SpinnerIcon, TimesIcon } from 'primeng/icons';
 import { ChatState } from '../../services/chat-state';
 import { Router } from '@angular/router';
 import { LlmModel } from '../../types';
@@ -13,7 +13,7 @@ import { LlmModel } from '../../types';
   templateUrl: './prompt-box.html',
   styleUrl: './prompt-box.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AutoResizeDirective, FormsModule, Select, ButtonDirective, ArrowUpIcon, TimesIcon, SpinnerIcon],
+  imports: [AutoResizeDirective, FormsModule, Select, ButtonDirective, ArrowUpIcon, TimesIcon, SpinnerIcon, PlusIcon],
 })
 export class PromptBox {
   readonly #chatState = inject(ChatState);
@@ -60,6 +60,17 @@ export class PromptBox {
         this.#chatState.setImage(file);
       }
     }
+  }
+
+  onImageSelected(event: Event) {
+    const fileInput = event.target as HTMLInputElement;
+    const files = fileInput.files;
+    const selectedImage = files?.item(0);
+
+    if (!selectedImage) return;
+
+    this.generatePreview(selectedImage);
+    this.#chatState.setImage(selectedImage);
   }
 
   private generatePreview(file: File): void {

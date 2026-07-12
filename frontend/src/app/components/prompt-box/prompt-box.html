@@ -1,8 +1,23 @@
 <div class="h-32 relative @container">
+  <div class="relative -top-24 h-20 bg-linear-to-t from-zinc-800 to-transparent w-full">
+  </div>
+
   <div
     class="@max-xl:max-w-11/12 absolute bottom-0 left-1/2 -translate-x-1/2 pointer-events-auto w-full max-w-lg lg:max-w-xl mx-auto rounded-xl border border-zinc-700 bg-zinc-900 p-4 shadow-lg">
+
+    @if (previewUrl()) {
+    <div class="relative w-28 active:translate-y-0.5 hover:[&_div]:grid cursor-pointer" (click)="removePastedImage()">
+      <img class="w-full block rounded-md border-transparent mb-3" [src]="previewUrl()">
+      <div
+        class="absolute hidden place-items-center w-full h-full border-2 border-zinc-200 rounded-md bg-black/35 text-white top-0 left-0">
+        <svg data-p-icon="times"></svg>
+      </div>
+    </div>
+    }
+
     <textarea appAutoResize class="mb-2 w-full h-full resize-none border-0 outline-none text-zinc-200 max-h-96"
-      placeholder="Write your question here..." [(ngModel)]="prompt" (keypress)="onEnterPressed($event)"></textarea>
+      placeholder="Write your question here..." (paste)="onPaste($event)" [(ngModel)]="prompt"
+      (keypress)="onEnterPressed($event)"></textarea>
 
     <div class="flex justify-end gap-x-2">
       <p-select variant="filled" [options]="availableModels" [(ngModel)]="choosedModel" optionLabel="label"

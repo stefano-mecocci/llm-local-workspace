@@ -1,3 +1,4 @@
+import base64
 from typing import List
 
 from fastapi import FastAPI, UploadFile, File, Form
@@ -46,18 +47,23 @@ async def generate_llm_stream(messages: List, model: str):
     messages.append({"role": LlmRoles.ASSISTANT, "content": ai_response})
 
 
-async def generate_llm_vision_stream(model_name: str, prompt: str, image_bytes: bytes):
+async def generate_llm_vision_stream(messages: List, model: str):
     client = ollama.AsyncClient()
     stream = await client.chat(
-        model=model_name,
-        messages=[{"role": "user", "content": prompt, "images": [image_bytes]}],
+        model=model,
+        messages=messages,
         stream=True,
     )
+
+    ai_response = ""
 
     async for chunk in stream:
         content = chunk["message"]["content"]
         if content:
+            ai_response += content
             yield content
+
+    messages.append({"role": LlmRoles.ASSISTANT, "content": ai_response})
 
 
 @app.get("/stream")
@@ -76,12 +82,26 @@ async def stream_endpoint(chat_id: str, prompt: str, model: str):
 
 @app.post("/stream-vision")
 async def stream_vision_endpoint(
+    chat_id: str = Form(...),
+    model: str = Form(...),
     prompt: str = Form(...),
     image: UploadFile = File(...),
 ):
     image_bytes = await image.read()
+
+    if chat_id not in messages_db:
+        messages_db[chat_id] = []
+
+    messages = messages_db[chat_id]
+    base64image = base64.b64encode(image_bytes).decode("utf-8")
+    messages.append({
+        "role": LlmRoles.USER,
+        "content": prompt,
+        "images": [base64image],
+    })
+
     return StreamingResponse(
-        generate_llm_vision_stream(MODEL, prompt, image_bytes),
+        generate_llm_vision_stream(messages, model),
         media_type="text/plain",
     )
 

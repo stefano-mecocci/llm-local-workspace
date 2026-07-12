@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
+import { ChatMessage } from '../../services/chat-state';
 
 @Component({
   selector: 'app-user-message',
@@ -7,5 +8,15 @@ import { Component, ChangeDetectionStrategy, input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserMessage {
-  readonly content = input.required<string>();
+  readonly message = input.required<ChatMessage>();
+  readonly imageSrc = computed(() => {
+    const src = this.message().images?.[0];
+    if (!src) return null;
+
+    if (src.startsWith("data")) {
+      return src;
+    } else {
+      return "data:*/*;base64," + src;
+    }
+  });
 }

@@ -1,5 +1,9 @@
 <div class="flex w-full justify-end">
-  <p class="max-w-[70%] rounded-lg bg-amber-700 px-5 py-4 text-white">
-    {{ content() }}
-  </p>
+  <div class="max-w-3/4 rounded-lg bg-amber-700 px-5 py-4 text-white flex flex-col gap-2">
+    @if (imageSrc()) {
+    <img [src]="imageSrc()" class="rounded-md max-w-48">
+    }
+
+    <p>{{ message().content }}</p>
+  </div>
 </div>

@@ -1,13 +1,14 @@
 import { HttpParams, httpResource } from '@angular/common/http';
 import { linkedSignal, Service, signal } from '@angular/core';
 import { LlmModel } from '../types';
+import fileToBase64 from '../utils/file-to-base64';
 
 export enum ChatMessageRole {
     Assistant = 'assistant',
     User = 'user',
 };
 
-export type ChatMessage = { role: ChatMessageRole; content: string; };
+export type ChatMessage = { role: ChatMessageRole; content: string; images?: string[] };
 
 @Service()
 export class ChatState {
@@ -46,6 +47,16 @@ export class ChatState {
         this.#selectedModel.set(newModel);
     }
 
+    #pastedImage = signal<File | null>(null);
+
+    setImage(file: File) {
+        this.#pastedImage.set(file);
+    }
+
+    dropPastedImage() {
+        this.#pastedImage.set(null);
+    }
+
     switchChat(newChatId: string, options: { stopCurrentStream?: boolean; } = {}) {
         if (options.stopCurrentStream) {
             this.stopCurrentStream();
@@ -66,6 +77,61 @@ export class ChatState {
 
         this.#isLoading.set(true);
         this.#isStreaming.set(true);
+
+        const pastedImage = this.#pastedImage();
+
+        if (pastedImage) {
+            await this.sendMessageWithImage(prompt, chatId, pastedImage);
+        } else {
+            await this.sendMessageOnly(prompt, chatId);
+        }
+    }
+
+    async sendMessageWithImage(prompt: string, chatId: string, image: File) {
+        this.addUserMessage(prompt, await fileToBase64(image));
+        this.addAiMessage('');
+
+        try {
+            const formData = new FormData();
+            formData.set('image', image);
+            formData.set('prompt', prompt);
+            formData.set('model', this.#selectedModel());
+            formData.set('chat_id', chatId);
+            const requestOptions: RequestInit = { signal: this.#abortLastPromptController?.signal, method: "POST", body: formData };
+            const url = `${this.API_URL}/stream-vision`;
+            const response = await fetch(url, requestOptions);
+
+            if (!response.body) throw new Error('No response body');
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            this.#isLoading.set(false);
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                this.updateLastAiMessage(chunk);
+            }
+        } catch (err) {
+            console.log(err);
+        } finally {
+            this.#abortLastPromptController = null;
+            this.#isStreaming.set(false);
+            this.chatIds.reload();
+            this.dropPastedImage();
+        }
+    }
+
+    private async sendMessageOnly(prompt: string, chatId: string) {
+        this.stopCurrentStream();
+        this.#abortLastPromptController = new AbortController();
+
+        this.#isLoading.set(true);
+        this.#isStreaming.set(true);
+
         this.addUserMessage(prompt);
         this.addAiMessage('');
 
@@ -126,9 +192,9 @@ export class ChatState {
         }
     }
 
-    private addUserMessage(message: string) {
+    private addUserMessage(message: string, image?: string) {
         this.#messages.update(prev => {
-            return [...prev, { role: ChatMessageRole.User, content: message }];
+            return [...prev, { role: ChatMessageRole.User, content: message, images: image ? [image] : [] }];
         });
     }
 

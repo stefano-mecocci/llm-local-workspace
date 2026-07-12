@@ -3,7 +3,7 @@
   @if (message.role === "assistant") {
   <app-ai-message [content]="message.content"></app-ai-message>
   } @else {
-  <app-user-message [content]="message.content"></app-user-message>
+  <app-user-message [message]="message"></app-user-message>
   }
   }
 

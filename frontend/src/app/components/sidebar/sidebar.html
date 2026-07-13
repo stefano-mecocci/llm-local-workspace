@@ -1,4 +1,6 @@
 @if (open()) {
+<div class="fixed inset-0 z-20 bg-black/70 sm:hidden" animate.enter="overlay-enter" animate.leave="overlay-leave"
+  (click)="close()"></div>
 <aside
   class="absolute left-0 top-0 z-30 flex h-full flex-col border-r border-zinc-700 overflow-hidden bg-zinc-900 sm:relative"
   animate.enter="sidebar-enter" animate.leave="sidebar-leave">
@@ -14,7 +16,7 @@
 
     <div class="mx-4">
       @if (!isRootRoute()) {
-      <a pButton routerLink="/" fluid><svg data-p-icon="plus"></svg>New chat</a>
+      <a pButton routerLink="/" fluid (click)="close()"><svg data-p-icon="plus"></svg>New chat</a>
       }
     </div>
 

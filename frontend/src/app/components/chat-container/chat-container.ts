@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, inject, effect, OnDestroy, viewChild, ElementRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, inject, effect, OnDestroy, viewChild, ElementRef, computed } from '@angular/core';
 import { MessageFeed } from '../message-feed/message-feed';
 import { PromptBox } from '../prompt-box/prompt-box';
 import { ChatState } from '../../services/chat-state';
@@ -14,10 +14,15 @@ export class ChatContainerComponent implements OnDestroy {
   readonly chatState = inject(ChatState);
 
   messages = this.chatState.messages;
+  displayMessages = computed(() => {
+    const msgs = this.messages();
+    const generating = this.chatState.generatingMessage();
+    return generating ? [...msgs, generating] : msgs;
+  });
   scrollContainer = viewChild<ElementRef<HTMLDivElement>>("scrollFrame");
 
   scrollOnUpdate = effect(() => {
-    const numOfMessages = this.messages().length;
+    const numOfMessages = this.displayMessages().length;
 
     if (numOfMessages > 0) {
       this.scrollToBottom();

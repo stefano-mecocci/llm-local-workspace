@@ -30,11 +30,13 @@ export class ChatState {
 
     #abortLastPromptController: AbortController | null = null;
     #selectedModel = signal<LlmModel>("gemma4:e2b");
+    #generatingMessage = signal<ChatMessage | null>(null);
 
     chatIds = httpResource<string[]>(() => `${this.API_URL}/chat_ids`);
     isStreaming = this.#isStreaming.asReadonly();
     isLoading = this.#isLoading.asReadonly();
     messages = this.#messages.asReadonly();
+    generatingMessage = this.#generatingMessage.asReadonly();
     currentChatId = this.#currentChatId.asReadonly();
 
     #chatHistoryResource = httpResource<ChatMessage[]>(() => {
@@ -76,22 +78,23 @@ export class ChatState {
         this.stopCurrentStream();
         this.#abortLastPromptController = new AbortController();
 
+        const pastedImage = this.#pastedImage();
+        const userImage = pastedImage ? await fileToBase64(pastedImage) : undefined;
+
+        this.addUserMessage(prompt, userImage);
+        this.#generatingMessage.set({ role: ChatMessageRole.Assistant, content: '' });
+
         this.#isLoading.set(true);
         this.#isStreaming.set(true);
 
-        const pastedImage = this.#pastedImage();
-
         if (pastedImage) {
-            await this.sendMessageWithImage(prompt, chatId, pastedImage);
+            await this.streamWithImage(prompt, chatId, pastedImage);
         } else {
-            await this.sendMessageOnly(prompt, chatId);
+            await this.streamText(chatId, prompt);
         }
     }
 
-    async sendMessageWithImage(prompt: string, chatId: string, image: File) {
-        this.addUserMessage(prompt, await fileToBase64(image));
-        this.addAiMessage('');
-
+    private async streamWithImage(prompt: string, chatId: string, image: File) {
         try {
             const formData = new FormData();
             formData.set('image', image);
@@ -102,65 +105,54 @@ export class ChatState {
             const url = `${this.API_URL}/stream-vision`;
             const response = await fetch(url, requestOptions);
 
-            if (!response.body) throw new Error('No response body');
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-
-            this.#isLoading.set(false);
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                this.updateLastAiMessage(chunk);
-            }
+            await this.consumeStream(response);
         } catch (err) {
             console.log(err);
         } finally {
-            this.#abortLastPromptController = null;
-            this.#isStreaming.set(false);
-            this.chatIds.reload();
             this.dropPastedImage();
+            this.finalizeStream();
         }
     }
 
-    private async sendMessageOnly(prompt: string, chatId: string) {
-        this.stopCurrentStream();
-        this.#abortLastPromptController = new AbortController();
-
-        this.#isLoading.set(true);
-        this.#isStreaming.set(true);
-
-        this.addUserMessage(prompt);
-        this.addAiMessage('');
-
+    private async streamText(chatId: string, prompt: string) {
         try {
             const url = this.buildStreamUrl(chatId, prompt, this.#selectedModel());
-            const response = await fetch(url, { signal: this.#abortLastPromptController.signal });
+            const response = await fetch(url, { signal: this.#abortLastPromptController!.signal });
 
-            if (!response.body) throw new Error('No response body');
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-
-            this.#isLoading.set(false);
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                this.updateLastAiMessage(chunk);
-            }
+            await this.consumeStream(response);
         } catch (err) {
             console.log(err);
         } finally {
-            this.#abortLastPromptController = null;
-            this.#isStreaming.set(false);
-            this.chatIds.reload();
+            this.finalizeStream();
         }
+    }
+
+    private async consumeStream(response: Response) {
+        if (!response.body) throw new Error('No response body');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        this.#isLoading.set(false);
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            this.#generatingMessage.update(msg => msg ? { ...msg, content: msg.content + chunk } : msg);
+        }
+    }
+
+    private finalizeStream() {
+        const generated = this.#generatingMessage();
+        if (generated) {
+            this.#messages.update(prev => [...prev, generated]);
+        }
+        this.#generatingMessage.set(null);
+        this.#abortLastPromptController = null;
+        this.#isStreaming.set(false);
+        this.chatIds.reload();
     }
 
     private buildStreamUrl(chatId: string, prompt: string, model: string) {
@@ -170,20 +162,6 @@ export class ChatState {
             .set("model", model);
 
         return `${this.API_URL}/stream?${params.toString()}`
-    }
-
-    private updateLastAiMessage(newContent: string) {
-        this.#messages.update(prev => {
-            const updated = [...prev];
-            const lastIndex = updated.length - 1;
-            if (lastIndex >= 0 && updated[lastIndex].role === ChatMessageRole.Assistant) {
-                updated[lastIndex] = {
-                    ...updated[lastIndex],
-                    content: updated[lastIndex].content + newContent
-                };
-            }
-            return updated;
-        });
     }
 
     private stopCurrentStream() {
@@ -197,11 +175,5 @@ export class ChatState {
         this.#messages.update(prev => {
             return [...prev, { role: ChatMessageRole.User, content: message, images: image ? [image] : [] }];
         });
-    }
-
-    private addAiMessage(message: string) {
-        this.#messages.update(prev => {
-            return [...prev, { role: ChatMessageRole.Assistant, content: message }];
-        })
     }
 }

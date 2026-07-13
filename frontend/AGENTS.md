@@ -35,6 +35,8 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - When using external templates/styles, use paths relative to the component TS file.
 - Create all the components inside the src/app/components folder
 - Always use tailwind classes to style components
+- Use PrimeNG components asked for
+- When importing PrimeNG icons use imports from `@primeicons/angular/<icon-name>`
 
 ## State Management
 

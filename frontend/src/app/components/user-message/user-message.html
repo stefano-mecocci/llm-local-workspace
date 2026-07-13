@@ -1,9 +1,20 @@
 <div class="flex w-full justify-end">
   <div class="max-w-3/4 rounded-lg bg-amber-700 px-5 py-4 text-white flex flex-col gap-2">
     @if (imageSrc()) {
-    <img [src]="imageSrc()" class="rounded-md max-w-48">
+    <img [src]="imageSrc()" class="rounded-md max-w-48 max-h-48 cursor-pointer" (click)="openOverlay()"
+      alt="Attached image">
     }
 
     <p>{{ message().content }}</p>
   </div>
 </div>
+
+@if (isOverlayOpen() && imageSrc()) {
+<div class="fixed inset-0 z-50 bg-black/70 p-8 flex items-center justify-center" (click)="closeOverlay()">
+  <button class="right-4! top-4! absolute!" pButton iconOnly severity="secondary" variant="text"
+    aria-label="Close sidebar" (click)="closeOverlay()"><svg data-p-icon="times" class="size-6!"></svg></button>
+
+  <img [src]="imageSrc()" class="max-w-full max-h-9/10 object-contain rounded-lg" (click)="$event.stopPropagation()"
+    alt="Attached image full screen">
+</div>
+}

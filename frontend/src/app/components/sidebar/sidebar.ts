@@ -20,7 +20,7 @@ export class Sidebar {
   chatIds = this.#chatState.chatIds;
   currentChatId = this.#chatState.currentChatId;
 
-  readonly open = signal(true);
+  readonly open = signal(window.matchMedia('(min-width: 640px)').matches);
   readonly #url = toSignal(
     this.#router.events.pipe(
       filter((e) => e instanceof NavigationEnd),

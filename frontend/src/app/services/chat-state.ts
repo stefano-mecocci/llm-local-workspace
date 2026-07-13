@@ -2,6 +2,7 @@ import { HttpParams, httpResource } from '@angular/common/http';
 import { linkedSignal, Service, signal } from '@angular/core';
 import { LlmModel } from '../types';
 import fileToBase64 from '../utils/file-to-base64';
+import { environment } from '../../environments/environment';
 
 export enum ChatMessageRole {
     Assistant = 'assistant',
@@ -12,7 +13,7 @@ export type ChatMessage = { role: ChatMessageRole; content: string; images?: str
 
 @Service()
 export class ChatState {
-    readonly API_URL = "http://localhost:8000";
+    readonly API_URL = environment.apiUrl;
 
     #currentChatId = signal<string | null>(null);
     #isStreaming = signal(false);

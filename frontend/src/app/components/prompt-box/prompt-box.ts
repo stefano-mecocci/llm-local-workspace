@@ -7,6 +7,7 @@ import { ArrowUpIcon, PlusIcon, SpinnerIcon, TimesIcon } from 'primeng/icons';
 import { ChatState } from '../../services/chat-state';
 import { Router } from '@angular/router';
 import { LlmModel } from '../../types';
+import randomAlphaNumericString from '../../utils/randomAlphanumericString';
 
 @Component({
   selector: 'app-prompt-box',
@@ -88,7 +89,7 @@ export class PromptBox {
     this.prompt.set('');
 
     if (this.#router.url === "/") {
-      const newChatId = crypto.randomUUID();
+      const newChatId = randomAlphaNumericString()  // crypto.randomUUID();
       this.#router.navigate(['chat', newChatId], {
         state: { prompt: trimmedPrompt }
       });

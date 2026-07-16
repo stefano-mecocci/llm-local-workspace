@@ -1,3 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+.p-button-icon-only svg {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+body .p-status-indicator,
+div[style*="position: fixed"][style*="bottom:"] {
+    display: none !important;
+}

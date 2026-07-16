@@ -1,5 +1,6 @@
 import base64
-from typing import List
+import time
+from typing import Dict, List, Optional
 
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
@@ -7,13 +8,23 @@ import ollama
 from fastapi.middleware.cors import CORSMiddleware
 from enum import Enum
 
-MODEL = "gemma4:e2b"
+from pydantic import BaseModel
 
 
 class LlmRoles(Enum):
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
+
+
+class ChatMessage(BaseModel):
+    role: LlmRoles
+    content: str
+    images: Optional[List[str]] = None
+
+
+class FrontendChatMessage(ChatMessage):
+    timestamp: int
 
 
 app = FastAPI()
@@ -25,14 +36,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-messages_db = {}
+messages_db: Dict[str, List[FrontendChatMessage]] = {}
 
 
-async def generate_llm_stream(messages: List, model: str):
+def add_ai_message(messages: List[FrontendChatMessage], content: str):
+    messages.append({
+        "role": LlmRoles.ASSISTANT,
+        "content": content,
+        "timestamp": int(time.time()),
+    })
+
+
+def remove_key_from_list(data_list: list[dict], key_to_remove: str) -> list[dict]:
+    return [{k: v for k, v in d.items() if k != key_to_remove} for d in data_list]
+
+
+async def generate_llm_stream(chat_id: str, model: str):
+    messages = messages_db[chat_id]
+    ollama_messages: List[ChatMessage] = remove_key_from_list(messages, "timestamp")
+
     client = ollama.AsyncClient()
     stream = await client.chat(
         model=model,
-        messages=messages,
+        messages=ollama_messages,
         stream=True,
     )
 
@@ -44,14 +70,17 @@ async def generate_llm_stream(messages: List, model: str):
             ai_response += content
             yield content
 
-    messages.append({"role": LlmRoles.ASSISTANT, "content": ai_response})
+    add_ai_message(messages, ai_response)
 
 
-async def generate_llm_vision_stream(messages: List, model: str):
+async def generate_llm_vision_stream(chat_id: str, model: str):
+    messages = messages_db[chat_id]
+    ollama_messages: List[ChatMessage] = remove_key_from_list(messages, "timestamp")
+
     client = ollama.AsyncClient()
     stream = await client.chat(
         model=model,
-        messages=messages,
+        messages=ollama_messages,
         stream=True,
     )
 
@@ -63,7 +92,7 @@ async def generate_llm_vision_stream(messages: List, model: str):
             ai_response += content
             yield content
 
-    messages.append({"role": LlmRoles.ASSISTANT, "content": ai_response})
+    add_ai_message(messages, ai_response)
 
 
 @app.get("/stream")
@@ -72,10 +101,14 @@ async def stream_endpoint(chat_id: str, prompt: str, model: str):
         messages_db[chat_id] = []
 
     messages = messages_db[chat_id]
-    messages.append({"role": LlmRoles.USER, "content": prompt})
+    messages.append({
+        "role": LlmRoles.USER,
+        "content": prompt,
+        "timestamp": int(time.time()),
+    })
 
     return StreamingResponse(
-        generate_llm_stream(messages, model),
+        generate_llm_stream(chat_id, model),
         media_type="text/plain",
     )
 
@@ -98,10 +131,11 @@ async def stream_vision_endpoint(
         "role": LlmRoles.USER,
         "content": prompt,
         "images": [base64image],
+        "timestamp": int(time.time()),
     })
 
     return StreamingResponse(
-        generate_llm_vision_stream(messages, model),
+        generate_llm_vision_stream(chat_id, model),
         media_type="text/plain",
     )
 
@@ -120,7 +154,7 @@ async def clean_db():
     return messages_db
 
 
-@app.get("/fetch_chat")
+@app.get("/fetch_chat", response_model=List[FrontendChatMessage])
 async def fetch_chat(chat_id: str):
     if chat_id not in messages_db:
         return []

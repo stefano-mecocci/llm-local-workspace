@@ -9,7 +9,7 @@ export enum ChatMessageRole {
     User = 'user',
 };
 
-export type ChatMessage = { role: ChatMessageRole; content: string; images?: string[] };
+export type ChatMessage = { role: ChatMessageRole; content: string; images?: string[]; timestamp: number; };
 
 @Service()
 export class ChatState {
@@ -82,7 +82,7 @@ export class ChatState {
         const userImage = pastedImage ? await fileToBase64(pastedImage) : undefined;
 
         this.addUserMessage(prompt, userImage);
-        this.#generatingMessage.set({ role: ChatMessageRole.Assistant, content: '' });
+        this.#generatingMessage.set({ role: ChatMessageRole.Assistant, content: '', timestamp: Date.now() });
 
         this.#isLoading.set(true);
         this.#isStreaming.set(true);
@@ -173,7 +173,7 @@ export class ChatState {
 
     private addUserMessage(message: string, image?: string) {
         this.#messages.update(prev => {
-            return [...prev, { role: ChatMessageRole.User, content: message, images: image ? [image] : [] }];
+            return [...prev, { role: ChatMessageRole.User, content: message, images: image ? [image] : [], timestamp: Date.now() }];
         });
     }
 }

@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import time
 from typing import Dict, List, Optional
@@ -25,6 +26,14 @@ class ChatMessage(BaseModel):
 
 class FrontendChatMessage(ChatMessage):
     timestamp: int
+
+
+class ChatPage(BaseModel):
+    messages: List[FrontendChatMessage]
+    hasMore: bool
+
+
+MESSAGES_PAGE_SIZE = 4
 
 
 app = FastAPI()
@@ -154,9 +163,25 @@ async def clean_db():
     return messages_db
 
 
-@app.get("/fetch_chat", response_model=List[FrontendChatMessage])
-async def fetch_chat(chat_id: str):
+@app.get("/fetch_chat", response_model=ChatPage)
+async def fetch_chat(
+    chat_id: str, limit: int = MESSAGES_PAGE_SIZE, before: Optional[int] = None
+):
     if chat_id not in messages_db:
-        return []
+        return ChatPage(messages=[], hasMore=False)
 
-    return messages_db[chat_id]
+    all_messages = messages_db[chat_id]
+    older_indexed = [
+        (index, message)
+        for index, message in enumerate(all_messages)
+        if before is None or message["timestamp"] < before
+    ]
+    older_indexed.sort(key=lambda im: (im[1]["timestamp"], im[0]))
+    older_messages = [message for _, message in older_indexed]
+
+    page = older_messages[-limit:]
+    has_more = len(older_messages) > limit
+
+    await asyncio.sleep(1)
+
+    return ChatPage(messages=page, hasMore=has_more)

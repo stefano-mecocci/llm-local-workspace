@@ -1,10 +1,21 @@
-<div class="flex flex-col h-full w-full overflow-y-auto" #scrollFrame>
+<div class="flex flex-col h-full w-full overflow-y-auto" #scrollFrame (scroll)="onScroll()">
+  @if (isLoadingHistory()) {
+    <div
+      class="sticky top-0 z-10 flex justify-center p-2 bg-linear-to-b from-zinc-800 to-transparent"
+      aria-live="polite"
+      role="status"
+    >
+      <p-progressbar mode="indeterminate" [style]="{ width: '100%', maxWidth: '48rem' }" />
+    </div>
+  }
+
   <app-message-feed [messages]="displayMessages()" />
 
   <div class="pointer-events-none sticky bottom-0 flex justify-center p-4 bg-zinc-800">
     <app-prompt-box (onSendPrompt)="handlePrompt($event)" />
   </div>
 
-  <div class="absolute top-0 h-20 bg-linear-to-b from-zinc-800 to-transparent w-19/20 left-1/2 -translate-x-1/2">
-  </div>
+  <div
+    class="absolute top-0 h-20 bg-linear-to-b from-zinc-800 to-transparent w-19/20 left-1/2 -translate-x-1/2"
+  ></div>
 </div>

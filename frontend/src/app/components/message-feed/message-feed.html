@@ -1,16 +1,16 @@
 <div class="flex h-full w-full max-w-3xl mx-auto flex-col gap-4 py-12 px-5">
-  @for (message of messages(); track $index) {
-  @if (message.role === "assistant") {
-  <app-ai-message [content]="message.content"></app-ai-message>
-  } @else {
-  <app-user-message [message]="message"></app-user-message>
-  }
+  @for (message of messages(); track message) {
+    @if (message.role === 'assistant') {
+      <app-ai-message [content]="message.content"></app-ai-message>
+    } @else {
+      <app-user-message [message]="message"></app-user-message>
+    }
   }
 
   @if (isLoading()) {
-  <div class="flex gap-x-2 items-center ml-2">
-    <div class="loader"></div>
-    <span class="text-zinc-300">Thinking...</span>
-  </div>
+    <div class="flex gap-x-2 items-center ml-2">
+      <div class="loader"></div>
+      <span class="text-zinc-300">Thinking...</span>
+    </div>
   }
 </div>

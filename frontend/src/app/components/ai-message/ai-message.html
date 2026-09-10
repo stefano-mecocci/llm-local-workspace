@@ -1,5 +1,13 @@
-<div class="flex w-full justify-start">
+<div class="flex flex-col w-full justify-start">
   <p class="rounded-2xl px-4 py-2 text-zinc-200">
     <markdown [data]="content()"></markdown>
   </p>
+
+  @if (!(isLast() && isLoading())) {
+  <div class="mt-2 ml-3">
+    <button pButton iconOnly size="large" severity="secondary" (click)="copyResponse()">
+      <svg data-p-icon="copy"></svg>
+    </button>
+  </div>
+  }
 </div>

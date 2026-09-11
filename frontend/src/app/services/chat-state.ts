@@ -54,6 +54,7 @@ export class ChatState {
   messages = this.#messages.asReadonly();
   generatingMessage = this.#generatingMessage.asReadonly();
   currentChatId = this.#currentChatId.asReadonly();
+  selectedModel = this.#selectedModel.asReadonly();
   hasMore = this.#hasMore.asReadonly();
   isLoadingHistory = this.#isLoadingHistory.asReadonly();
   loadCount = this.#loadCount.asReadonly();

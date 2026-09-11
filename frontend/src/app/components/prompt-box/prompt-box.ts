@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal, model, inject, output } from '@angular/core';
 import { AutoResizeDirective } from "../../directives/auto-resize";
 import { FormsModule } from '@angular/forms';
-import { Select, SelectChangeEvent } from 'primeng/select';
+import { Select } from 'primeng/select';
 import { ButtonDirective } from 'primeng/button';
 import { ArrowUpIcon, PlusIcon, SpinnerIcon, TimesIcon } from 'primeng/icons';
 import { ChatState } from '../../services/chat-state';
@@ -24,14 +24,13 @@ export class PromptBox {
   readonly prompt = model('');
   readonly previewUrl = signal<string | null>(null);
   readonly availableModels = OLLAMA_MODELS.map((model) => ({ label: model, model }));
-  readonly choosedModel = signal<LlmModel>(OLLAMA_MODELS[0]);
+  readonly selectedModel = this.#chatState.selectedModel;
 
   onSendPrompt = output<string>();
   isStreaming = this.#chatState.isStreaming;
 
-  changeModel(event: SelectChangeEvent) {
-    const selectedModel = event.value;
-    this.#chatState.switchModel(selectedModel);
+  switchModel(newModel: LlmModel) {
+    this.#chatState.switchModel(newModel);
   }
 
   onEnterPressed(event: KeyboardEvent) {

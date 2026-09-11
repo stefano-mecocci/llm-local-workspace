@@ -7,6 +7,7 @@ import { ArrowUpIcon, PlusIcon, SpinnerIcon, TimesIcon } from 'primeng/icons';
 import { ChatState } from '../../services/chat-state';
 import { Router } from '@angular/router';
 import { LlmModel } from '../../types';
+import { OLLAMA_MODELS } from '../../generated/ollama-models';
 import randomAlphaNumericString from '../../utils/randomAlphanumericString';
 
 @Component({
@@ -22,11 +23,8 @@ export class PromptBox {
 
   readonly prompt = model('');
   readonly previewUrl = signal<string | null>(null);
-  readonly availableModels: { label: string, model: LlmModel }[] = [
-    { label: "Gemma 4 (2B)", model: "gemma4:e2b" },
-    { label: "Gemma 4 (4B MLX)", model: "gemma4:e4b-mlx" }
-  ];
-  readonly choosedModel = signal<LlmModel>("gemma4:e2b");
+  readonly availableModels = OLLAMA_MODELS.map((model) => ({ label: model, model }));
+  readonly choosedModel = signal<LlmModel>(OLLAMA_MODELS[0]);
 
   onSendPrompt = output<string>();
   isStreaming = this.#chatState.isStreaming;

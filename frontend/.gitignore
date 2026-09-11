@@ -34,6 +34,9 @@ testem.log
 /typings
 __screenshots__/
 
+# Generated files
+/src/app/generated
+
 # System files
 .DS_Store
 Thumbs.db

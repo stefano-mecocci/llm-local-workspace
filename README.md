@@ -8,7 +8,7 @@ A self-hosted chat workspace for running conversations against local LLMs. This 
 - Vision prompts: paste or attach an image and query multimodal models
 - Multiple chats with a sidebar and persistent history
 - Paginated message loading for long conversations
-- Model switcher (e.g. `gemma4:e2b`, `gemma4:e4b-mlx`)
+- Model switcher listing all chat-capable models installed in Ollama
 - Markdown rendering of AI responses with copy-to-clipboard
 - Responsive layout with mobile sidebar overlay
 
@@ -36,9 +36,12 @@ A self-hosted chat workspace for running conversations against local LLMs. This 
 ├── frontend/         # Angular application
 │   └── src/app/
 │       ├── components/   # Layout, chat, messages, prompt box, sidebar
+│       ├── generated/    # Ollama model list (created by scripts/generate_models.py, gitignored)
 │       ├── services/     # ChatState (signals-based store, SSE consumption)
 │       ├── routes.ts     # Lazy-loaded routes: home and chat/:id
 │       └── utils/        # Helpers (base64 encoding, random ids)
+├── scripts/          # Pre-run tooling
+│   └── generate_models.py  # Generates the frontend model list from Ollama
 └── AGENTS.md         # Global agent/contributor guidelines
 ```
 
@@ -61,7 +64,17 @@ export DATABASE_URL="postgresql+psycopg://user:password@localhost:5432/app"
 
 The schema is created automatically on backend startup.
 
-### 2. Run the backend
+### 2. Generate the model list
+
+With Ollama running, generate the list of chat-capable models used by the frontend model switcher:
+
+```bash
+python3 scripts/generate_models.py
+```
+
+The script queries Ollama (`OLLAMA_HOST`, default `http://localhost:11434`) and writes `frontend/src/app/generated/ollama-models.ts` (gitignored). Re-run it whenever you pull or remove models, and before every fresh build.
+
+### 3. Run the backend
 
 ```bash
 cd backend
@@ -71,7 +84,7 @@ uv run fastapi dev main.py
 
 The API is served at `http://localhost:8000` (interactive docs at `http://localhost:8000/docs`).
 
-### 3. Run the frontend
+### 4. Run the frontend
 
 ```bash
 cd frontend
@@ -103,6 +116,10 @@ Open `http://localhost:4200`. In development, requests to `/api/*` are proxied t
 - `npm start` — start the dev server (port 4200, with API proxy)
 - `npm run build` — production build
 - `npm test` — run unit tests
+
+**Tooling** (from the repository root):
+
+- `python3 scripts/generate_models.py` — regenerate the frontend model list from the local Ollama instance (required before starting the app)
 
 ## Contributing
 

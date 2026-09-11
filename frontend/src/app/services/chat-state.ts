@@ -1,6 +1,7 @@
 import { HttpParams, httpResource } from '@angular/common/http';
 import { Service, signal, effect } from '@angular/core';
 import { LlmModel } from '../types';
+import { OLLAMA_MODELS } from '../generated/ollama-models';
 import fileToBase64 from '../utils/file-to-base64';
 import { environment } from '../../environments/environment';
 
@@ -36,7 +37,7 @@ export class ChatState {
 
   #messages = signal<ChatMessage[]>([]);
   #generatingMessage = signal<ChatMessage | null>(null);
-  #selectedModel = signal<LlmModel>('gemma4:e2b');
+  #selectedModel = signal<LlmModel>(OLLAMA_MODELS[0]);
 
   #request = signal<PageRequest | null>(null);
   #requestVersion = 0;

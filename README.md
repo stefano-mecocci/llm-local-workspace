@@ -2,7 +2,7 @@
 
 A self-hosted chat workspace for running conversations against local LLMs. This monorepo pairs a **FastAPI** backend that streams responses from [Ollama](https://ollama.com) with an **Angular** frontend, and persists every conversation in PostgreSQL so chat history survives restarts.
 
-![Local LLM Workspace screenshot](other/screenshot-september-2026.png)
+![Local LLM Workspace screenshot](other/video_demo.gif)
 
 ## Features
 
